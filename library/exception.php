@@ -14,10 +14,8 @@ class Message {
 		$info = Service::run('kernel:message:information');
 		
 		// If any info was sent, add a header
-		if(count($info)) {
-			array_unshift($info, "<div class='section'><h1>System Information</h1>");
-			array_push($info, "</div>");
-		}
+		if(count($info))
+			array_unshift($info, "<h1>System Information</h1>");
 			
 		// Check for exception
 		if($object instanceof \Exception)
@@ -51,10 +49,7 @@ class Message {
 		// Show stack trace
 		$out .= '<h4>Stack Trace</h4><div class="trace">';
 		$trace = (array) $exception->getTrace();
-		foreach($trace as $i => $step) {
-			if(isset($trace[$i + 1]) && isset($trace[$i + 1]['class']) && $trace[$i + 1]['class'] == 'Evolution\\Kernel\\Service')
-				continue;
-			
+		foreach($trace as $step) {
 			$class = isset($step['class']) 		? "<span class='class'>$step[class]</span>$step[type]" : '';
 			$args = isset($step['args']) 		? implode(', ', $this->filter($step['args'])) : '';
 			$func = isset($step['function']) 	? "<span class='func'>$step[function]</span><span class='parens'>(</span>$args<span class='parens'>)</span>" : '';
@@ -70,9 +65,6 @@ class Message {
 		if(is_object($prev))
 			$out .= $this->displayException($prev);
 			
-		// Close section
-		$out .= '</div>';
-		
 		// Return output
 		return $out;
 	}
@@ -80,7 +72,7 @@ class Message {
 	/**
 	 * Filter an array by PHP type
 	 */
-	private function filter($array) {
+	private function filter(&$array) {
 		foreach($array as $key => $value) {
 			if(is_array($value)) {
 				$array[$key] = "<span class='array'>Array [".count($value)."]</span>";

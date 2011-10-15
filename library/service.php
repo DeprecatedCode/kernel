@@ -31,6 +31,14 @@ class Service {
 		// First argument is what to bind to
 		$agent = array_shift($services);
 		
+		// Check for agent
+		if(is_null($agent))
+			throw new \InvalidArgumentException("An agent must be passed to the `Service::bind` call as the first argument.");
+			
+		// Check for services
+		if(!count($services))
+			throw new \InvalidArgumentException("Bound service(s) must be passed to the `Service::bind` call after the agent.");
+		
 		// Bind all services
 		foreach($services as $service) {
 			
@@ -75,7 +83,7 @@ class Service {
 		
 		// Loop throuch bound providers
 		foreach(self::$services[$name] as $provider) {
-		
+			
 			// Try so we can handle exceptions properly
 			try {
 				
@@ -86,15 +94,11 @@ class Service {
 				// If running as complete, throw again
 				if($type == 'complete')
 					throw $c;
-					
+				
 				// If running as each, save the value
 				if($type == 'each')
 					$result[] = $c->value;
 				
-			} catch(\Exception $e) {
-				
-				// Save the exception for later access
-				self::$exceptions[] = $e;
 			}
 		}
 		
@@ -117,18 +121,11 @@ class Service {
 		if(!isset($args[0]) || !is_string($args[0]))
 			throw new \Exception("No task name provided");
 		
-		// Store name
-		$name = $args[0];
+		// Get name
+		$name = array_shift($args);
 		
 		// Run the task
-		try {
-			self::runService('complete', $name, $args);
-		}
-		
-		// If completed, return the completion value
-		catch(Completion $c) {
-			return $c->value;
-		}
+		self::runService('complete', $name, $args);
 		
 		// Throw incomplete exception if no Completion was caught
 		throw new IncompleteException("Task `$name` was not completed by any agents,

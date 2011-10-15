@@ -24,11 +24,21 @@ function handleException($e) {
 // Error Handler
 set_error_handler(__NAMESPACE__.'\handleError');
 function handleError($no, $msg, $file, $line) {
-	throw new \Exception("$msg on line $line of `$file`");
+	throw new \ErrorException("$msg on line $line in file `$file`", 0, $no, $file, $line);
 }
+
+// Set dump eval constant
+define('d', 'preg_match("/^(.*)\\((\\d+)\\)\\s\\:\\seval\\(\\)\\\'d code/", __FILE__, $___DUMP);
+	if(defined("Evolution\\Kernel\\Dump"))throw new Exception("Evolution dump already loaded");
+	require_once("'.__DIR__.'/library/dump.php");');
 
 // Include Load manually
 require_once(__DIR__ . '/library/load.php');
 
-// Run services bound to startup
-Service::complete('kernel:startup');
+// Check for a framework and load it - deprecate this
+if(is_file($fw = dirname(__DIR__) . '/_framework.php'))
+	require_once($fw);
+
+// Run services bound to startup if not in site context
+if(!defined('\\Evolution\\Site\\Root'))
+	Service::complete('kernel:startup');
